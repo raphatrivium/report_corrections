@@ -97,7 +97,7 @@ double angularCoefficient(double sigmaXY, double sigmaX)
     
     a = sigmaXY/pow(sigmaX,2);
     
-    std::cout << "Angular Coefficient: " << a << std::endl;
+    std::cout << "Angular Coefficient: " << a << "  J.s" <<  std::endl;
 
     return a;
 }
@@ -111,17 +111,110 @@ int rel4_efeito_fotoeletrico() {
 
     // std::vector<double> x = {5.19, 5.49, 6.88, 7.41, 8.22};
     // std::vector<double> y = {0.718,0.785,1.347,1.507,1.783};
+    double electronCharge =1.60218e-19;
 
-    std::vector<double> x = {3.24, 3.43, 4.29, 4.62, 5.13};
+    // Anderson e Pedro
+    std::vector<double> x = {5.19E+14,5.49E+14,6.88E+14,7.41E+14,8.22E+14};
     std::vector<double> y = {0.649, 0.810, 1.458, 1.530, 1.958};
+
+    int n = x.size();
+
+
+    std::cout << "----------------------------------------: " << std::endl;
+    std::cout << "nu(frequency) : ";
+    for (int i = 0; i < n; ++i) {
+        std::cout  << x[i] << "  ";
+    }
+    std::cout << "[Hz]" << std::endl;
+    std::cout << "nu/e         : ";
+    for (int i = 0; i < n; ++i) {
+        std::cout  << x[i]/electronCharge << "  " ;
+        x[i] = x[i]/electronCharge; // Update the vector value (nu/e)
+    }
+    std::cout << "[𝐶−1𝑠−1 ⋅ 10e33]" << std::endl;
+    std::cout << "V            : ";
+    for (int i = 0; i < n; ++i) {
+        std::cout <<  y[i] << "  " ;
+    }
+    std::cout << "[Volts]" << std::endl;
+    std::cout << "----------------------------------------: " << std::endl;
+
 
     double sigmaXY = covariance(x,y);
     double sigmaX = standardDeviation(x);
 
     double a = angularCoefficient(sigmaXY, sigmaX);
 
+    double meanX = 0;
+    double meanY = 0;
+    for (int i = 0; i < n; ++i) {
+        meanX += x[i]/n;
+        meanY += y[i]/n;
+    }
+
+    double b = meanY - a*meanX;
+    std::cout << "b: " <<  b  << " Volts" << std::endl;
     // double a, b;
     // leastSquaresFit(x, y, a, b);
+
+    double epsilonY = 0; // 
+    for (int i = 0; i < n; ++i) {
+        epsilonY += pow( (y[i]-(a*x[i]+b) ) ,2);
+        std::cout << "y[i]: " << y[i] << " | prevision: " <<  (a*x[i]+b) << " | resíduo: " << y[i]-(a*x[i]+b) << std::endl;
+    }
+    epsilonY = epsilonY/(n-2);
+    epsilonY = pow(epsilonY,0.5);
+
+    std::cout << "epsilonY: " <<  epsilonY  << std::endl;
+
+
+
+    double sigmaA = epsilonY/(sigmaX*pow(n,0.5)); // 
+    // double sigmA = epsilonY/(sigmaX*n); // test for error
+
+    std::cout << "sigmaA: " <<  sigmaA  << std::endl;
+
+
+    double meanX2 = 0;
+    for (int i = 0; i < n; ++i) {
+        meanX2 += pow(x[i],2)/n;
+        // std::cout << "meanX2: " <<  meanX2  << std::endl;
+    }
+    std::cout << "meanX2: " <<  meanX2  << std::endl;
+
+    double sigmaB = sigmaA*pow(meanX2,0.5);
+
+    std::cout << "sigmaB: " <<  sigmaB  << std::endl;
+
+    double jToEv = 6.242e18; // Scale factor "J" to "eV"
+
+    std::cout << "h   = " <<  a << " +- " << sigmaA << " J.s" << std::endl;
+    std::cout << "or " << std::endl;
+    std::cout << "h   = " <<  a*jToEv << " +- " << sigmaA*jToEv << " eV.s" << std::endl;
+
+    std::cout << "phi = " <<  b << " +- " << sigmaB << " Volts" << std::endl;
+
+
+    double hRef = 4.135e-15; // eV.s   Planck Constant
+    double h =  a*jToEv; // eV.s
+    double sigmaH =  sigmaA*jToEv; // eV.s
+
+    double epsilon = abs(h-hRef)/hRef;
+    std::cout << "epsilon = " <<  epsilon << " | " << epsilon*100 << " %" << std::endl;
+
+
+    double discrepancy = abs(h-hRef)/(2*sigmaH);
+
+    std::string strDis = "";
+    if (discrepancy < 1.){
+        strDis = " < 1";
+    }
+    else{
+        strDis = " > 1";
+    }
+
+    std::cout << "discrepancy = " <<  discrepancy << strDis << std::endl;
+
 
     // std::cout << "Fitted line: y = " << a << "x + " << b << std::endl;
     return 0;
