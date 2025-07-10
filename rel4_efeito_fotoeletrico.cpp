@@ -3,40 +3,6 @@
 #include <cmath>
 
 
-
-
-
-
-// Least Squares Fitting: y = ax + b
-void leastSquaresFit(const std::vector<double>& x, const std::vector<double>& y, 
-                     double& a, double& b) {
-    if (x.size() != y.size() || x.empty()) {
-        std::cerr << "Error: Invalid input data!" << std::endl;
-        return;
-    }
-
-    double sumX = 0.0, sumY = 0.0, sumXY = 0.0, sumX2 = 0.0;
-    int n = x.size();
-
-    // Compute sums
-    for (int i = 0; i < n; ++i) {
-        sumX += x[i];
-        sumY += y[i];
-        sumXY += x[i] * y[i];
-        sumX2 += x[i] * x[i];
-    }
-
-    // Calculate coefficients (a = slope, b = intercept)
-    double denominator = n * sumX2 - sumX * sumX;
-    if (std::abs(denominator) < 1e-10) {
-        std::cerr << "Error: Singular matrix (vertical line)." << std::endl;
-        return;
-    }
-
-    a = (n * sumXY - sumX * sumY) / denominator;
-    b = (sumY * sumX2 - sumX * sumXY) / denominator;
-}
-
 double covariance(const std::vector<double>& x, 
                 const std::vector<double>& y) 
 {
@@ -114,8 +80,12 @@ int rel4_efeito_fotoeletrico() {
     double electronCharge =1.60218e-19;
 
     // Anderson e Pedro
+    // std::vector<double> x = {5.19E+14,5.49E+14,6.88E+14,7.41E+14,8.22E+14};
+    // std::vector<double> y = {0.649, 0.810, 1.458, 1.530, 1.958};
+
+    // Agatha, Samuel e Thayna
     std::vector<double> x = {5.19E+14,5.49E+14,6.88E+14,7.41E+14,8.22E+14};
-    std::vector<double> y = {0.649, 0.810, 1.458, 1.530, 1.958};
+    std::vector<double> y = {0.718,0.785,1.347,1.507,1.783};
 
     int n = x.size();
 
@@ -131,7 +101,7 @@ int rel4_efeito_fotoeletrico() {
         std::cout  << x[i]/electronCharge << "  " ;
         x[i] = x[i]/electronCharge; // Update the vector value (nu/e)
     }
-    std::cout << "[𝐶−1𝑠−1 ⋅ 10e33]" << std::endl;
+    std::cout << "[C-1.s-1 ]" << std::endl;
     std::cout << "V            : ";
     for (int i = 0; i < n; ++i) {
         std::cout <<  y[i] << "  " ;
@@ -152,6 +122,10 @@ int rel4_efeito_fotoeletrico() {
         meanY += y[i]/n;
     }
 
+    // -------------------------------------------------
+    //  epsilonY
+    // -------------------------------------------------
+
     double b = meanY - a*meanX;
     std::cout << "b: " <<  b  << " Volts" << std::endl;
     // double a, b;
@@ -167,13 +141,11 @@ int rel4_efeito_fotoeletrico() {
 
     std::cout << "epsilonY: " <<  epsilonY  << std::endl;
 
-
-
+    // -------------------------------------------------
+    //  SIGMA a and SIGMA b
+    // -------------------------------------------------
     double sigmaA = epsilonY/(sigmaX*pow(n,0.5)); // 
-    // double sigmA = epsilonY/(sigmaX*n); // test for error
-
     std::cout << "sigmaA: " <<  sigmaA  << std::endl;
-
 
     double meanX2 = 0;
     for (int i = 0; i < n; ++i) {
@@ -189,11 +161,14 @@ int rel4_efeito_fotoeletrico() {
     double jToEv = 6.242e18; // Scale factor "J" to "eV"
 
     std::cout << "h   = " <<  a << " +- " << sigmaA << " J.s" << std::endl;
-    std::cout << "or " << std::endl;
+    std::cout << "or (applying scalefactor" << jToEv << " ""J"" to ""eV"" )" << std::endl;
     std::cout << "h   = " <<  a*jToEv << " +- " << sigmaA*jToEv << " eV.s" << std::endl;
 
     std::cout << "phi = " <<  b << " +- " << sigmaB << " Volts" << std::endl;
 
+    // -------------------------------------------------
+    //  epsilon
+    // -------------------------------------------------
 
     double hRef = 4.135e-15; // eV.s   Planck Constant
     double h =  a*jToEv; // eV.s
@@ -202,9 +177,11 @@ int rel4_efeito_fotoeletrico() {
     double epsilon = abs(h-hRef)/hRef;
     std::cout << "epsilon = " <<  epsilon << " | " << epsilon*100 << " %" << std::endl;
 
+    // -------------------------------------------------
+    //  DISCREPANCY
+    // -------------------------------------------------
 
     double discrepancy = abs(h-hRef)/(2*sigmaH);
-
     std::string strDis = "";
     if (discrepancy < 1.){
         strDis = " < 1";
@@ -212,7 +189,6 @@ int rel4_efeito_fotoeletrico() {
     else{
         strDis = " > 1";
     }
-
     std::cout << "discrepancy = " <<  discrepancy << strDis << std::endl;
 
 
