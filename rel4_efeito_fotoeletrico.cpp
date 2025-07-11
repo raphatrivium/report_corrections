@@ -71,12 +71,7 @@ double angularCoefficient(double sigmaXY, double sigmaX)
 
 
 int rel4_efeito_fotoeletrico() {
-    // Example data points (x, y)
-    // std::vector<double> x = {1.0, 2.0, 3.0, 4.0, 5.0};
-    // std::vector<double> y = {1.1, 1.9, 3.2, 4.0, 5.1};
-
-    // std::vector<double> x = {5.19, 5.49, 6.88, 7.41, 8.22};
-    // std::vector<double> y = {0.718,0.785,1.347,1.507,1.783};
+    
     double electronCharge =1.60218e-19;
 
     // Anderson e Pedro
@@ -84,25 +79,37 @@ int rel4_efeito_fotoeletrico() {
     // std::vector<double> y = {0.649, 0.810, 1.458, 1.530, 1.958};
 
     // Agatha, Samuel e Thayna
+    // std::vector<double> x = {5.19E+14,5.49E+14,6.88E+14,7.41E+14,8.22E+14};
+    // std::vector<double> y = {0.718,0.785,1.347,1.507,1.783};
+
+    // Jiayi, Sara e Vitor
+    // std::vector<double> x = {5.19E+14,5.49E+14,6.88E+14,7.41E+14,8.22E+14};
+    // std::vector<double> y = {0.619, 0.761, 1.377, 1.503, 1.842 };
+
+    // Carlos e Nathalia
     std::vector<double> x = {5.19E+14,5.49E+14,6.88E+14,7.41E+14,8.22E+14};
-    std::vector<double> y = {0.718,0.785,1.347,1.507,1.783};
+    std::vector<double> y = {0.495, 0.574, 1.336, 0.733, 0.906 };
+    // std::vector<double> y = {0,537,0,638,1,345,0,785,0,934 }; // Primeira medidad deles
+
+
+
 
     int n = x.size();
 
 
-    std::cout << "----------------------------------------: " << std::endl;
-    std::cout << "nu(frequency) : ";
+    std::cout << "------------- DATA --------------------------: " << std::endl;
+    std::cout << "nu(frequency)  : ";
     for (int i = 0; i < n; ++i) {
         std::cout  << x[i] << "  ";
     }
     std::cout << "[Hz]" << std::endl;
-    std::cout << "nu/e         : ";
+    std::cout << "nu/e          X: ";
     for (int i = 0; i < n; ++i) {
         std::cout  << x[i]/electronCharge << "  " ;
         x[i] = x[i]/electronCharge; // Update the vector value (nu/e)
     }
     std::cout << "[C-1.s-1 ]" << std::endl;
-    std::cout << "V            : ";
+    std::cout << "V             Y: ";
     for (int i = 0; i < n; ++i) {
         std::cout <<  y[i] << "  " ;
     }
@@ -128,6 +135,7 @@ int rel4_efeito_fotoeletrico() {
 
     double b = meanY - a*meanX;
     std::cout << "b: " <<  b  << " Volts" << std::endl;
+    std::cout << "----------------------------------------: " << std::endl;
     // double a, b;
     // leastSquaresFit(x, y, a, b);
 
@@ -140,12 +148,14 @@ int rel4_efeito_fotoeletrico() {
     epsilonY = pow(epsilonY,0.5);
 
     std::cout << "epsilonY: " <<  epsilonY  << std::endl;
+    std::cout << "----------------------------------------: " << std::endl;
 
     // -------------------------------------------------
     //  SIGMA a and SIGMA b
     // -------------------------------------------------
     double sigmaA = epsilonY/(sigmaX*pow(n,0.5)); // 
     std::cout << "sigmaA: " <<  sigmaA  << std::endl;
+    std::cout << "----------------------------------------: " << std::endl;
 
     double meanX2 = 0;
     for (int i = 0; i < n; ++i) {
@@ -153,43 +163,68 @@ int rel4_efeito_fotoeletrico() {
         // std::cout << "meanX2: " <<  meanX2  << std::endl;
     }
     std::cout << "meanX2: " <<  meanX2  << std::endl;
+    std::cout << "----------------------------------------: " << std::endl;
 
     double sigmaB = sigmaA*pow(meanX2,0.5);
 
     std::cout << "sigmaB: " <<  sigmaB  << std::endl;
+    std::cout << "----------------------------------------: " << std::endl;
 
     double jToEv = 6.242e18; // Scale factor "J" to "eV"
+    double h =  a*jToEv; // "eV.s"
+    double sigmaH =  sigmaA*jToEv; // "eV.s"
 
     std::cout << "h   = " <<  a << " +- " << sigmaA << " J.s" << std::endl;
-    std::cout << "or (applying scalefactor" << jToEv << " ""J"" to ""eV"" )" << std::endl;
-    std::cout << "h   = " <<  a*jToEv << " +- " << sigmaA*jToEv << " eV.s" << std::endl;
+    std::cout << "or (applying scalefactor " << jToEv << " ""J"" to ""eV"" )" << std::endl;
+    // std::cout << "h   = " <<  a*jToEv << " +- " << sigmaA*jToEv << " eV.s\n" << std::endl;
+    std::cout << "h   = " <<  h  << " +- " << sigmaH << " eV.s\n" << std::endl;
+
 
     std::cout << "phi = " <<  b << " +- " << sigmaB << " Volts" << std::endl;
+    std::cout << "----------------------------------------: " << std::endl;
 
     // -------------------------------------------------
-    //  epsilon
+    //  epsilon (erro relativo)
     // -------------------------------------------------
-
     double hRef = 4.135e-15; // eV.s   Planck Constant
-    double h =  a*jToEv; // eV.s
-    double sigmaH =  sigmaA*jToEv; // eV.s
 
-    double epsilon = abs(h-hRef)/hRef;
-    std::cout << "epsilon = " <<  epsilon << " | " << epsilon*100 << " %" << std::endl;
+    double epsilon = sigmaH/abs(h);
+    std::cout << "epsilon (erro relativo)= " <<  epsilon << " | " << epsilon*100 << " %" << std::endl;
+    std::cout << "----------------------------------------: " << std::endl;
+
+
+    // double epsilon = abs(h-hRef)/hRef;
+    // std::cout << "epsilon = " <<  epsilon << " | " << epsilon*100 << " %" << std::endl;
 
     // -------------------------------------------------
-    //  DISCREPANCY
+    //  Compatibilidade
     // -------------------------------------------------
 
-    double discrepancy = abs(h-hRef)/(2*sigmaH);
+    double compatibility = abs(h-hRef)/(sigmaH);
     std::string strDis = "";
+    if (compatibility < 2.){
+        strDis = " < 2";
+    }
+    else{
+        strDis = " > 2";
+    }
+    std::cout << "compatibility (z)= " <<  compatibility << strDis << std::endl;
+    std::cout << "----------------------------------------: " << std::endl;
+
+
+    // -------------------------------------------------
+    //  discrepancy
+    // -------------------------------------------------
+    double discrepancy = abs(h-hRef)/(2*sigmaH);
     if (discrepancy < 1.){
         strDis = " < 1";
     }
     else{
         strDis = " > 1";
     }
-    std::cout << "discrepancy = " <<  discrepancy << strDis << std::endl;
+    std::cout << "discrepancy = " << discrepancy << strDis << std::endl;
+    std::cout << "----------------------------------------: " << std::endl;
+
 
 
     // std::cout << "Fitted line: y = " << a << "x + " << b << std::endl;
