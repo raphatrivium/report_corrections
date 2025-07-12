@@ -14,6 +14,12 @@ int rel4_efeito_fotoeletricoV2() {
     // 1  x=eV , y=nu  ,  a=h
     // 2  x=V  , y=nu  ,  a=h/e
 
+
+    // Para testes
+    // DefFlag = 1;
+    // std::vector<double> x = {1,2,3,4};
+    // std::vector<double> y = {2,3,4,5};
+
     // std::vector<double> x = {5.19e14, 5.49e14, 6.88e14, 7.41e14, 8.22e14};
     // std::vector<double> y = {0.619, 0.761, 1.377, 1.503, 1.842 };
 
@@ -28,21 +34,22 @@ int rel4_efeito_fotoeletricoV2() {
 
     int n = x.size();
 
-    std::cout << "------------- Medidas Computadas --------------------------: " << std::endl;
+    std::cout << "------------- Medidas Coletadas --------------------------: " << std::endl;
     std::cout << "nu(frequency) X: ";
     for (int i = 0; i < n; ++i) {
         std::cout  << x[i] << "  ";
     }
-    std::cout << "[Hz] [1/s]" << std::endl;
+    std::cout << "[Hz] ou [1/s]" << std::endl;
     std::cout << "V             Y: ";
     for (int i = 0; i < n; ++i) {
         std::cout <<  y[i] << "  " ;
     }
-    std::cout << "[Volts] [J/C]\n" << std::endl;
+    std::cout << "[Volts] ou [J/C]\n" << std::endl;
 
     std::cout << "------------- Medidas a serem usadas --------------------------: " << std::endl;
 
     if ( DefFlag == 0){
+        std::cout << "y=V\nx=nu/e\na=h\n" << std::endl;
         std::cout << "nu/e          X: ";
         for (int i = 0; i < n; ++i) {
             std::cout  << x[i]/e << "  " ;
@@ -72,9 +79,17 @@ int rel4_efeito_fotoeletricoV2() {
     }
     else if ( DefFlag == 2)
     {
-        std::cout << "----------------------------" << std::endl;
-        std::cout << "Coefienciente angular a=h/e"  << std::endl;
-        std::cout << "----------------------------" << std::endl;
+        std::cout << "y=V\nx=nu\na=h/e\n" << std::endl;
+        std::cout << "nu(frequency) X: ";
+        for (int i = 0; i < n; ++i) {
+            std::cout  << x[i] << "  ";
+        }
+        std::cout << "[Hz] ou [1/s]" << std::endl;
+        std::cout << "V             Y: ";
+        for (int i = 0; i < n; ++i) {
+            std::cout <<  y[i] << "  " ;
+        }
+        std::cout << "[Volts] ou [J/C]\n" << std::endl;
     }
     
     std::cout << "----------------------------------------: " << std::endl;
@@ -145,41 +160,50 @@ int rel4_efeito_fotoeletricoV2() {
     std::cout << "RESULTADO FINAL: \n" << std::endl;
 
     double jToEv = 6.242e18; // Scale factor "J" to "eV"
+    double h = 0;
+    double sigmaH = 0;
+
 
     if ( DefFlag == 0){
-        double h = a;
-        double sigmaH = sigmaA;
+        h = a;
+        sigmaH = sigmaA;
 
         std::cout << "h   = " <<  h << " +- " << sigmaH << " J.s" << std::endl;
         std::cout << "phi = " <<  b << " +- " << sigmaB << " Volts\n" << std::endl;
 
         std::cout << "or applying scale factor " << jToEv << " ('J' to 'eV' )\n" << std::endl;
 
-        std::cout << "h   = " <<  h*jToEv  << " +- " << sigmaH*jToEv << " eV.s" << std::endl;
-        std::cout << "phi = " <<  b*jToEv << " +- " << sigmaB*jToEv << " Volts" << std::endl;
+        std::cout << "h   = " <<  h*jToEv  << " +- " << sigmaH*jToEv << " [eV.s]" << std::endl;
+        std::cout << "phi = " <<  b*jToEv << " +- " << sigmaB*jToEv << " [Volts]" << std::endl;
         
     }
     else if ( DefFlag == 1)
     {
-        double h = a;
-        double sigmaH = sigmaA;
-        std::cout << "h = " <<  h << " +- " << sigmaA << " J.s" << std::endl;
-        std::cout << "phi = " <<  b << " +- " << sigmaB << " J\n" << std::endl;
+        h = a;
+        sigmaH = sigmaA;
+        std::cout << "h   = " <<  h << " +- " << sigmaA << " [J.s]" << std::endl;
+        std::cout << "phi = " <<  b << " +- " << sigmaB << " [J]\n" << std::endl;
     }
     else if ( DefFlag == 2)
     {
-        std::cout << "a = " <<  a << " +- " << sigmaA << " J.s / C  [V.s]" << std::endl;
-        std::cout << "b = " <<  b << " +- " << sigmaB << " V" << std::endl;
+        std::cout << "a = " <<  a << " +- " << sigmaA << " [J.s/C]  [V.s]" << std::endl;
+        std::cout << "b = " <<  b << " +- " << sigmaB << " [V]\n" << std::endl;
 
-        std::cout << " Multilicando pela carga do eletron 'e':" << std::endl;
+        std::cout << " Multilicando pela carga do eletron 'e':\n" << std::endl;
 
-        double h = a*e;
-        double sigmaH = sigmaA*e;
+        h = a*e;
+        sigmaH = sigmaA*e;
 
-        std::cout << "h = " <<  h << " +- " << sigmaH << " J.s" << std::endl;
+        std::cout << "h = " <<  h << " +- " << sigmaH << " [J.s]" << std::endl;
 
     }
 
+    std::cout << "----------------------------------------: " << std::endl;
+    
+    double relErr = (sigmaH*100)/h;
+
+
+    std::cout << "Erro Relativo: "<< relErr << " %" <<std::endl;
 
 
     std::cout << "----------------------------------------: " << std::endl;
